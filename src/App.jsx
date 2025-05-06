@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Search from "./components/Search";
+import Loader from "./components/Loader";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -14,15 +15,32 @@ const API_OPTIONS = {
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const fetchMovies = async () => {
+    setIsLoading(true);
+    setError("");
     try {
       const endPoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endPoint, API_OPTIONS);
-      return response;
+      if (!response.ok) {
+        throw new error("Failed to fetch movies.");
+      }
+
+      const data = await response.json();
+      if (data.Response === false) {
+        setError(data.Error || "Failed to fetch movies.");
+        setMovies([]);
+        return;
+      } else {
+        setMovies(data.results || []);
+      }
     } catch (error) {
       console.error(error);
       setError("Error fetching movies. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -45,8 +63,16 @@ const App = () => {
             <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           </header>
           <section className="all-movies">
-            <h2>All Movies</h2>
+            <h2 className="mt-[20px]">All Movies</h2>
             {error && <p className="text-red-500">{error}</p>}
+            {isLoading && <Loader />}
+            <ul>
+              {movies.map((movie) => (
+                <li className="text-white" key={movie.id}>
+                  {movie.title}
+                </li>
+              ))}
+            </ul>
           </section>
         </div>
       </main>
