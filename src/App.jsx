@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Search from "./components/Search";
 import Loader from "./components/Loader";
+import Card from "./components/Card";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -68,9 +69,7 @@ const App = () => {
             {isLoading && <Loader />}
             <ul>
               {movies.map((movie) => (
-                <li className="text-white" key={movie.id}>
-                  {movie.title}
-                </li>
+                <Card key={movie.id} movie={movie} />
               ))}
             </ul>
           </section>
